@@ -21,6 +21,8 @@ class Settings:
     PG_PORT = getenv("PG_PORT") or 5432
     PG_HOST = getenv("PG_HOST") or "localhost"
 
+    MEDIA_DIR = "media"
+
     def __new__(cls, *args, **kwargs):
         if not cls._instance:
             cls._instance = super(Settings, cls).__new__(cls)
