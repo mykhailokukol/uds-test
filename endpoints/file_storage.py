@@ -7,6 +7,7 @@ from services.endpoints.file_storage import (
     get_top_10_files,
     set_headers,
     download_file,
+    download_xlsx_report,
 )
 
 
@@ -51,3 +52,13 @@ async def read_top_10_files():
 async def read_top_10_files_in_dir(dir_name: str):
     response = await get_top_10_files(dir_name)
     return JSONResponse(response, status_code=200)
+
+
+@router.get("/report/{id}")
+async def read_report(id: int):
+    filepath, filename = await download_xlsx_report(id)
+    print(filepath, filename)
+    try:
+        return FileResponse(filepath, filename=filename, status_code=200)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Not found")

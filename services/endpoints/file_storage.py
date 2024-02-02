@@ -1,4 +1,6 @@
 import os
+import pandas as pd
+from openpyxl import Workbook
 from fastapi import UploadFile, Response
 
 from config.conf import settings
@@ -25,9 +27,9 @@ async def upload_file_to_storage(file: UploadFile, path: str = None) -> dict:
     # Store in DB part
     file_exists = read_query(
         """
-        select id from files where filepath = '%s'
+        select id from files where name = '%s'
         """
-        % (file_path,)
+        % (file.filename,)
     )
     if file_exists:
         create_query(
@@ -125,3 +127,29 @@ async def download_file(id: int):
     file_name = file_path[0][1]
     file_path = f"{file_path[0][0]}{file_name}"
     return file_path, file_name
+
+
+async def download_xlsx_report(file_id: int) -> str:
+    """Opens .txt file, makes it .xslx and adds operation result"""
+    filepath = read_query(
+        """
+        select filepath, name from files
+        where id = %s
+        """
+        % (file_id,)
+    )[0]
+    result_filename = f"{filepath[1][:-4]}.xlsx"
+    filepath = os.path.join(filepath[0], filepath[1])
+
+    df = pd.read_csv(filepath, delimiter=" ", header=None, names=["Місяць", "Значення"])
+    new_row = {"Місяць": "Результат", "Значення": " "}
+    df.loc[len(df)] = new_row
+
+    operation_index = df[df["Місяць"] == "Операція"].index[0]
+    operation = df.at[operation_index, "Значення"]
+    formula = operation.join("B" + str(i + 2) for i in range(operation_index))
+    df.at[df.index[-1], "Значення"] = f"={formula}"
+
+    filepath_xlsx = f"{filepath[:-4]}.xlsx"
+    df.to_excel(filepath_xlsx, index=False, engine="openpyxl")
+    return filepath_xlsx, result_filename
