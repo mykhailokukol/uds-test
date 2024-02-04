@@ -15,11 +15,11 @@ class Settings:
 
     _instance = None
 
-    PG_NAME = getenv("PG_NAME")
-    PG_USER = getenv("PG_USER")
-    PG_PASSWORD = getenv("PG_PASSWORD")
-    PG_PORT = getenv("PG_PORT") or 5432
-    PG_HOST = getenv("PG_HOST") or "localhost"
+    PG_NAME = getenv("POSTGRES_DB")
+    PG_USER = getenv("POSTGRES_USER")
+    PG_PASSWORD = getenv("POSTGRES_PASSWORD")
+    PG_PORT = getenv("POSTGRES_PORT") or 5432
+    PG_HOST = getenv("POSTGRES_HOST") or "localhost"
 
     MEDIA_DIR = "media"
 
